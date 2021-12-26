@@ -12,8 +12,10 @@ idna==3.3
 line-bot-sdk==2.0.1
 multidict==5.2.0
 requests==2.26.0
+six==1.16.0
 soupsieve==2.3.1
 sqlparse==0.4.2
+transitions==0.8.10
 typing-extensions==4.0.1
 urllib3==1.26.7
 yarl==1.7.2

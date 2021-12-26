@@ -27,7 +27,7 @@ SECRET_KEY = os.environ['DJANGO_DRAW_SECRET']
 DEBUG = True
 
 ALLOWED_HOSTS = [
-        '9ac1-111-255-174-51.ngrok.io'
+        'caae-111-255-174-51.ngrok.io'
 ]
 
 
