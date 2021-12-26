@@ -130,3 +130,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Line tokens
 LINE_CHANNEL_ACCESS_TOKEN = os.environ['DRAW_ACCESS_TOKEN']
 LINE_CHANNEL_SECRET = os.environ['DRAW_SECRET_TOKEN']
+IMGUR_CLIENT_ID = os.environ['IMGUR_CLIENT_ID']
