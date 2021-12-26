@@ -58,6 +58,21 @@ def callback(request):
             elif (user_map[user_id].is_ready()):
                 # graph type state
                 input_transition(event, user_id, 0)
+            elif (user_map[user_id].is_node1()):
+                # graph type state
+               set_cur_transition(event, user_id, 1)
+            elif (user_map[user_id].is_node2()):
+                # graph type state
+                yes_no_transition(event, user_id)
+                if (user_map[user_id].is_other()):
+                    user_map[user_id].relations.append(user_map[user_id].cur_relation[:])
+            elif (user_map[user_id].is_label()):
+                # graph type state
+               set_cur_transition(event, user_id, 2)
+            elif (user_map[user_id].is_other()):
+                # graph type state
+               yes_no_transition(event, user_id)
+               user_map[user_id].cur_relation = ["", "", ""]
             elif (user_map[user_id].is_input()):
                 # state for input node-edge relation
                 input_transition(event, user_id, 1)
@@ -90,22 +105,44 @@ def start_transition(event, user_id):
     if (event.message.text.lower() == 'direction'):
         user_map[user_id].graph_type = 'direction' 
         user_map[user_id].enter_type()
-        return
-    elif (event.message.text.lower() == 'undirection'):
-        user_map[user_id].graph_type = 'undirection'
+    elif (event.message.text.lower() == 'indirection'):
+        user_map[user_id].graph_type = 'indirection'
         user_map[user_id].enter_type()
-        return
-
-    user_map[user_id].unrecognized()
-    message = "$ Unrecogized graph type\nPlease choose directional or undirectional graph"
-    if isinstance(event, MessageEvent):  # checked if is text event
-        line_bot_api.reply_message(  #  echo the text passed in
-            event.reply_token,
-            TextSendMessage(text=message, emojis = cross_emoji)
-        )
+    else:
+        user_map[user_id].unrecognized()
+        message = "$ Unrecogized graph type\nPlease choose directional or indirectional graph"
+        if isinstance(event, MessageEvent):  # checked if is text event
+            line_bot_api.reply_message(  #  echo the text passed in
+                event.reply_token,
+                TextSendMessage(text=message, emojis = cross_emoji)
+            )
         
-def input_transition(event, user_id, has_input):
-    if (has_input and event.message.text.lower() == "ok"):
+def set_cur_transition(event, user_id, pos):
+    user_map[user_id].cur_relation[pos] = event.message.text 
+    if (pos == 2):
+        user_map[user_id].enter_label()
+        user_map[user_id].relations.append(user_map[user_id].cur_relation[:])
+    else:
+        user_map[user_id].enter_node()
+
+def yes_no_transition(event, user_id):
+    message = ""
+    print(event.message.text.lower())
+    if (event.message.text.lower() == 'yes'):
+        user_map[user_id].enter_yes()
+    elif (event.message.text.lower() == 'no'):
+        user_map[user_id].enter_no()
+    else:
+        user_map[user_id].unrecognized()
+        message = "$ Unrecogized graph type\nPlease choose directional or indirectional graph"
+        if isinstance(event, MessageEvent):  # checked if is text event
+            line_bot_api.reply_message(  #  echo the text passed in
+                event.reply_token,
+                TextSendMessage(text=message, emojis = cross_emoji)
+            )
+
+def input_transition(event, user_id, is_ready):
+    if (is_ready and event.message.text.lower() == "ok"):
         user_map[user_id].enter_ok()
         return
     parse_result = parse(event.message.text)
@@ -113,12 +150,8 @@ def input_transition(event, user_id, has_input):
         user_map[user_id].relations.append(parse_result[1])
         user_map[user_id].enter_relation()
     else:
-        message = "$ Unrecognized input\nPlease input again!"
-        if isinstance(event, MessageEvent):  # checked if is text event
-            line_bot_api.reply_message(  #  echo the text passed in
-                event.reply_token,
-                TextSendMessage(text=message, emojis = cross_emoji)
-            )
+        user_map[user_id].cur_relation[0] = event.message.text 
+        user_map[user_id].enter_node()
 
 def gen_transition(event, user_id):
     if (event.message.text.lower() == "continue"):

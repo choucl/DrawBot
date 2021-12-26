@@ -39,6 +39,18 @@ class RobotMachine(object):
                 "name": "input",
                 "on_enter": self._on_enter_input
             }, {
+                "name": "node1",
+                "on_enter": self._on_enter_node1
+            }, {
+                "name": "node2",
+                "on_enter": self._on_enter_node2
+            }, {
+                "name": "label",
+                "on_enter": self._on_enter_label
+            }, {
+                "name": "other",
+                "on_enter": self._on_enter_other
+            }, {
                 "name": "gen",
                 "on_enter": self._on_enter_gen
             }
@@ -51,23 +63,31 @@ class RobotMachine(object):
             initial="start"
         )
 
-
-        self.machine.add_transition("enter_type", "start", "ready")
-        self.machine.add_transition("unrecognized", "start", "start")
+        self.machine.add_transition("enter_type",     "start", "ready")
+        self.machine.add_transition("unrecognized",   "start", "start")
         self.machine.add_transition("enter_relation", "ready", "input")
-        self.machine.add_transition("unrecognized", "ready", "ready")
+        self.machine.add_transition("unrecognized",   "ready", "ready")
+        self.machine.add_transition("enter_node",     "ready", "node1")
+        self.machine.add_transition("enter_node",     "node1", "node2")
+        self.machine.add_transition("enter_yes",      "node2", "label")
+        self.machine.add_transition("enter_no",       "node2", "other")
+        self.machine.add_transition("enter_label",    "label", "other")
+        self.machine.add_transition("enter_yes",      "other", "node1")
+        self.machine.add_transition("enter_no",       "other", "input")
         self.machine.add_transition("enter_relation", "input", "input")
-        self.machine.add_transition("unrecognized", "input", "input")
-        self.machine.add_transition("enter_ok", "input", "gen")
-        self.machine.add_transition("enter_continue", "gen", "input")
-        self.machine.add_transition("enter_restart", "gen", "start")
+        self.machine.add_transition("enter_node",     "input", "node1")
+        self.machine.add_transition("unrecognized",   "input", "input")
+        self.machine.add_transition("enter_ok",       "input", "gen")
+        self.machine.add_transition("enter_continue", "gen",   "input")
+        self.machine.add_transition("enter_restart",  "gen",   "start")
 
         self.graph_type = ""
+        self.cur_relation = ["", "", ""]
         self.relations = []
 
     def _on_enter_start(self):
         print("enter start")
-        line_bot_api.push_message(  # 回復傳入的訊息文字
+        line_bot_api.push_message(
             self.user_id,
             TemplateSendMessage(
                 alt_text="Choose graph type",
@@ -80,8 +100,8 @@ class RobotMachine(object):
                             text='direction'
                         ),
                         MessageTemplateAction(
-                            label='Undirectional graph',
-                            text='undirection'
+                            label='Indirectional graph',
+                            text='indirection'
                         )
                     ]
                 )
@@ -90,21 +110,83 @@ class RobotMachine(object):
 
     def _on_enter_ready(self):
         print("enter ready")
-        message = "Type " + self.graph_type + " chosen\nStart input relations:"
+        message = "Type " + self.graph_type + " chosen\nStart input first node!"
         line_bot_api.push_message(
             self.user_id,
             TextSendMessage(message)
         )
         message = \
-            "$ Examples: \n" \
+            "$ You could also use these instructions to construct relations: \n" \
             "- node1 --> node2\n" \
             "- node3 --edge-> node4" \
-            "- ok"
         
         line_bot_api.push_message(
             self.user_id,
             TextSendMessage(message, emojis=hint_emoji)
         )
+
+    def _on_enter_node1(self):
+        print("enter node1")
+        message = "Enter the second node:"
+        line_bot_api.push_message(
+            self.user_id,
+            TextSendMessage(message)
+        )
+    
+    def _on_enter_node2(self):
+        print("enter node2")
+        line_bot_api.push_message(
+            self.user_id,
+            TemplateSendMessage(
+                alt_text="If label name?",
+                template=ButtonsTemplate(
+                    title='Any label name?',
+                    text="Any label name for relation?",
+                    actions=[
+                        MessageTemplateAction(
+                            label='Yes',
+                            text='yes'
+                        ),
+                        MessageTemplateAction(
+                            label='No',
+                            text='no'
+                        )
+                    ]
+                )
+            )
+        )
+
+    def _on_enter_label(self):
+        print("enter label")
+        message = "Enter the label for relation:"
+        line_bot_api.push_message(
+            self.user_id,
+            TextSendMessage(message)
+        )
+
+    def _on_enter_other(self):
+        print("enter other")
+        line_bot_api.push_message(
+            self.user_id,
+            TemplateSendMessage(
+                alt_text="Other node?",
+                template=ButtonsTemplate(
+                    title='Other node',
+                    text="Any other node from the first node?",
+                    actions=[
+                        MessageTemplateAction(
+                            label='Yes',
+                            text='yes'
+                        ),
+                        MessageTemplateAction(
+                            label='No',
+                            text='no'
+                        )
+                    ]
+                )
+            )
+        )
+
 
     def _on_enter_input(self):
         print("enter input")
@@ -117,6 +199,20 @@ class RobotMachine(object):
             self.user_id,
             TextSendMessage(message, emojis=hint_emoji)
         )
+        message = "Enter the next node or ok to generate graph:\n"
+        line_bot_api.push_message(
+            self.user_id,
+            TextSendMessage(message)
+        )
+        message = \
+            "$ You could also use these instructions to construct relations: \n" \
+            "- node1 --> node2\n" \
+            "- node3 --edge-> node4"
+        line_bot_api.push_message(
+            self.user_id,
+            TextSendMessage(message, emojis=hint_emoji)
+        )
+
 
 
     def _on_enter_gen(self):
@@ -147,12 +243,12 @@ class RobotMachine(object):
             )
         )
 
-        line_bot_api.push_message(  # 回復傳入的訊息文字
+        line_bot_api.push_message(
             self.user_id,
             TemplateSendMessage(
                 alt_text="What's next?",
                 template=ButtonsTemplate(
-                    title='Types',
+                    title='Next behavior',
                     text="What's next?",
                     actions=[
                         MessageTemplateAction(
