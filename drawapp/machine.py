@@ -108,12 +108,12 @@ class RobotMachine(object):
                     text='Please choose the graph type',
                     actions=[
                         MessageTemplateAction(
-                            label='Directional graph',
-                            text='direction'
+                            label='Directed graph',
+                            text='directed'
                         ),
                         MessageTemplateAction(
-                            label='Indirectional graph',
-                            text='indirection'
+                            label='Undirected graph',
+                            text='undirected'
                         )
                     ]
                 )
@@ -123,11 +123,13 @@ class RobotMachine(object):
 
     def _on_enter_ready(self):
         print("enter ready")
-        message = "Type " + self.graph_type + " chosen\nStart input first node!"
+        message = "Type " + self.graph_type + " chosen."
+        self.message_q.append(TextSendMessage(message[:]))
+        message = "Start input first node!"
         self.message_q.append(TextSendMessage(message[:]))
         message = \
             "$ You could also use these instructions to construct relations: \n" \
-            "- node1 --> node2\n" \
+            "- node1 ---> node2\n" \
             "- node3 --edge-> node4"
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
         self.line_bot_reply()
@@ -195,9 +197,12 @@ class RobotMachine(object):
         print("enter input")
         message = "$ Current Input status:"
         for element in self.relations:
-            message += "\n" + element[0] + " --> " + element[1]
+            message += "\n" + element[0]
             if (element[2] != ""):
-                message += " (edge: " + element[2] + ")"
+                message += " --" + element[2] + "-> "
+            else:
+                message += " ---> "
+            message +=  element[1]
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
 
         message = "Enter 'the next node' or 'ok':"
@@ -205,7 +210,7 @@ class RobotMachine(object):
 
         message = \
             "$ You could also use these instructions to construct relations: \n" \
-            "- node1 --> node2\n" \
+            "- node1 ---> node2\n" \
             "- node3 --edge-> node4"
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
 

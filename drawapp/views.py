@@ -87,15 +87,38 @@ def callback(request):
         return HttpResponseBadRequest()
 
 
+def parse(str):
+    split = str.split("\n")
+    parse_result = []
+    parse_state = ""
+    if (len(split) > 1):
+        for line in split:
+            tmp = line_parse(line)
+            if tmp[0] == False:
+                return ("error", [])
+            else:
+                parse_result.append(tmp)
+        parse_state = "relation"
+    else:
+        tmp = line_parse(str)
+        if (tmp[0]):
+            parse_result.append(tmp)
+            parse_state = "relation"
+        else:
+            parse_result.append(tmp)
+            parse_state = "node"
+    return (parse_state, parse_result)
+
+
 # parse the user input string
 # input: string
 # output: tuple, (success or not, tokenize result)
-def parse(str):
+def line_parse(str):
     split = str.split()
     if len(split) != 3:
         return (False, ())
     else:
-        if (split[1] == '-->'):
+        if (split[1] == '--->'):
             return (True, (split[0], split[2], ""))
         elif (split[1][:2] == '--' and split[1][-2:] == '->'):
             return (True, (split[0], split[2], split[1][2:-2]))
@@ -104,14 +127,14 @@ def parse(str):
 
 def start_transition(event, user_id):
     message = ""
-    if (event.message.text.lower() == 'direction'):
-        user_map[user_id].graph_type = 'direction' 
+    if (event.message.text.lower() == 'directed'):
+        user_map[user_id].graph_type = 'directed' 
         user_map[user_id].enter_type()
-    elif (event.message.text.lower() == 'indirection'):
-        user_map[user_id].graph_type = 'indirection'
+    elif (event.message.text.lower() == 'undirected'):
+        user_map[user_id].graph_type = 'undirected'
         user_map[user_id].enter_type()
     else:
-        message = "$ Unrecogized graph type\nPlease choose directional or indirectional graph"
+        message = "$ Unrecogized graph type\nPlease choose directed or undirected graph"
         user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
         user_map[user_id].unrecognized()
         
@@ -136,18 +159,21 @@ def yes_no_transition(event, user_id):
         user_map[user_id].unrecognized()
 
 def input_transition(event, user_id, is_ready):
-    if not isinstance(event, MessageEvent):  # checked if is text event
-        return
     if (is_ready and event.message.text.lower() == "ok"):
         user_map[user_id].enter_ok()
         return
     parse_result = parse(event.message.text)
-    if (parse_result[0]):
-        user_map[user_id].relations.append(parse_result[1])
+    if (parse_result[0] == "relation"):
+        for result in parse_result[1]:
+            user_map[user_id].relations.append(result[1])
         user_map[user_id].enter_relation()
-    else:
+    elif (parse_result[1] == "node"):
         user_map[user_id].cur_relation[0] = event.message.text 
         user_map[user_id].enter_node()
+    else:
+        message = "$ Unrecognized input\nPlease input again!"
+        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].unrecognized()
 
 def gen_transition(event, user_id):
     if (event.message.text.lower() == "continue"):
