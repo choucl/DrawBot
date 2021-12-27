@@ -233,10 +233,10 @@ class RobotMachine(object):
             else: 
                 graph.edge(relation[0], relation[1])
         graph.format = "png"
-        graph.render(self.user_id, view=False, outfile=None)
+        graph.render(self.user_id, view=False, directory='dot-output')
         print("render successfully")
         im = pyimgur.Imgur(settings.IMGUR_CLIENT_ID)
-        path = self.user_id + ".png"
+        path = "dot-output/" + self.user_id + ".png"
         uploaded_image = im.upload_image(path)
         self.message_q.append(
             ImageSendMessage(
