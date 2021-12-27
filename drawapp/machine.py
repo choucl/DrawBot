@@ -71,9 +71,11 @@ class RobotMachine(object):
         self.machine.add_transition("enter_node",     "node1", "node2")
         self.machine.add_transition("enter_yes",      "node2", "label")
         self.machine.add_transition("enter_no",       "node2", "other")
+        self.machine.add_transition("unrecognized",   "node2", "node2")
         self.machine.add_transition("enter_label",    "label", "other")
         self.machine.add_transition("enter_yes",      "other", "node1")
         self.machine.add_transition("enter_no",       "other", "input")
+        self.machine.add_transition("unrecognized",   "other", "other")
         self.machine.add_transition("enter_relation", "input", "input")
         self.machine.add_transition("enter_node",     "input", "node1")
         self.machine.add_transition("unrecognized",   "input", "input")
@@ -81,14 +83,23 @@ class RobotMachine(object):
         self.machine.add_transition("enter_continue", "gen",   "input")
         self.machine.add_transition("enter_restart",  "gen",   "start")
 
+        self.reply_token = ""
         self.graph_type = ""
         self.cur_relation = ["", "", ""]
         self.relations = []
+        self.message_q = []
+
+    def line_bot_reply(self):
+        line_bot_api.reply_message(
+            self.reply_token,
+            self.message_q
+        )
+        self.message_q = []
+
 
     def _on_enter_start(self):
         print("enter start")
-        line_bot_api.push_message(
-            self.user_id,
+        self.message_q.append(
             TemplateSendMessage(
                 alt_text="Choose graph type",
                 template=ButtonsTemplate(
@@ -107,36 +118,28 @@ class RobotMachine(object):
                 )
             )
         )
+        self.line_bot_reply()
 
     def _on_enter_ready(self):
         print("enter ready")
         message = "Type " + self.graph_type + " chosen\nStart input first node!"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message)
-        )
+        self.message_q.append(TextSendMessage(message[:]))
         message = \
             "$ You could also use these instructions to construct relations: \n" \
             "- node1 --> node2\n" \
-            "- node3 --edge-> node4" \
-        
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message, emojis=hint_emoji)
-        )
+            "- node3 --edge-> node4"
+        self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
+        self.line_bot_reply()
 
     def _on_enter_node1(self):
         print("enter node1")
         message = "Enter the second node:"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message)
-        )
+        self.message_q.append(TextSendMessage(message[:]))
+        self.line_bot_reply()
     
     def _on_enter_node2(self):
         print("enter node2")
-        line_bot_api.push_message(
-            self.user_id,
+        self.message_q.append(
             TemplateSendMessage(
                 alt_text="If label name?",
                 template=ButtonsTemplate(
@@ -155,19 +158,17 @@ class RobotMachine(object):
                 )
             )
         )
+        self.line_bot_reply()
 
     def _on_enter_label(self):
         print("enter label")
         message = "Enter the label for relation:"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message)
-        )
+        self.message_q.append(TextSendMessage(message[:]))
+        self.line_bot_reply()
 
     def _on_enter_other(self):
         print("enter other")
-        line_bot_api.push_message(
-            self.user_id,
+        self.message_q.append(
             TemplateSendMessage(
                 alt_text="Other node?",
                 template=ButtonsTemplate(
@@ -186,6 +187,7 @@ class RobotMachine(object):
                 )
             )
         )
+        self.line_bot_reply()
 
 
     def _on_enter_input(self):
@@ -195,23 +197,18 @@ class RobotMachine(object):
             message += "\n" + element[0] + " --> " + element[1]
             if (element[2] != ""):
                 message += " (edge: " + element[2] + ")"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message, emojis=hint_emoji)
-        )
-        message = "Enter the next node or ok to generate graph:\n"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message)
-        )
+        self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
+
+        message = "Enter 'the next node' or 'ok':"
+        self.message_q.append(TextSendMessage(message[:]))
+
         message = \
             "$ You could also use these instructions to construct relations: \n" \
             "- node1 --> node2\n" \
             "- node3 --edge-> node4"
-        line_bot_api.push_message(
-            self.user_id,
-            TextSendMessage(message, emojis=hint_emoji)
-        )
+        self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
+
+        self.line_bot_reply()
 
 
 
@@ -235,16 +232,14 @@ class RobotMachine(object):
         im = pyimgur.Imgur(settings.IMGUR_CLIENT_ID)
         path = self.user_id + ".png"
         uploaded_image = im.upload_image(path)
-        line_bot_api.push_message(
-            self.user_id,
+        self.message_q.append(
             ImageSendMessage(
                 original_content_url=uploaded_image.link,
                 preview_image_url=uploaded_image.link
             )
         )
 
-        line_bot_api.push_message(
-            self.user_id,
+        self.message_q.append(
             TemplateSendMessage(
                 alt_text="What's next?",
                 template=ButtonsTemplate(
@@ -263,3 +258,4 @@ class RobotMachine(object):
                 )
             )
         )
+        self.line_bot_reply()

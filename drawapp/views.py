@@ -52,6 +52,7 @@ def callback(request):
             if (not user_id in user_map):
                 user_map[user_id] = RobotMachine(user_id)
 
+            user_map[user_id].reply_token = event.reply_token
             if (user_map[user_id].is_start()):
                 # start state
                 start_transition(event, user_id)
@@ -109,13 +110,9 @@ def start_transition(event, user_id):
         user_map[user_id].graph_type = 'indirection'
         user_map[user_id].enter_type()
     else:
-        user_map[user_id].unrecognized()
         message = "$ Unrecogized graph type\nPlease choose directional or indirectional graph"
-        if isinstance(event, MessageEvent):  # checked if is text event
-            line_bot_api.reply_message(  #  echo the text passed in
-                event.reply_token,
-                TextSendMessage(text=message, emojis = cross_emoji)
-            )
+        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].unrecognized()
         
 def set_cur_transition(event, user_id, pos):
     user_map[user_id].cur_relation[pos] = event.message.text 
@@ -133,15 +130,13 @@ def yes_no_transition(event, user_id):
     elif (event.message.text.lower() == 'no'):
         user_map[user_id].enter_no()
     else:
+        message = "$ Unrecogized input\nPlease choose yes or no"
+        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
         user_map[user_id].unrecognized()
-        message = "$ Unrecogized graph type\nPlease choose directional or indirectional graph"
-        if isinstance(event, MessageEvent):  # checked if is text event
-            line_bot_api.reply_message(  #  echo the text passed in
-                event.reply_token,
-                TextSendMessage(text=message, emojis = cross_emoji)
-            )
 
 def input_transition(event, user_id, is_ready):
+    if not isinstance(event, MessageEvent):  # checked if is text event
+        return
     if (is_ready and event.message.text.lower() == "ok"):
         user_map[user_id].enter_ok()
         return
@@ -164,13 +159,8 @@ def gen_transition(event, user_id):
         return
     else:
         message = "$ Unrecognized input\nPlease input again!"
-        if isinstance(event, MessageEvent):  # checked if is text event
-            line_bot_api.reply_message(  #  echo the text passed in
-                event.reply_token,
-                TextSendMessage(text=message, emojis = cross_emoji)
-            )
-            line_bot_api.push_message(  # 回復傳入的訊息文字
-                user_id,
+        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].message_q.append(
                 TemplateSendMessage(
                     alt_text="What's next?",
                     template=ButtonsTemplate(
