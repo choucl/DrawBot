@@ -1,8 +1,0 @@
-digraph {
-	Hey [label=Hey]
-	Hey [label=Hey]
-	Hey -> Hey [label=You]
-	Ik [label=Ik]
-	Ok [label=Ok]
-	Ik -> Ok
-}
