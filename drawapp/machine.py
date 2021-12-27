@@ -1,5 +1,6 @@
 from django.conf import settings
 from transitions import Machine
+from transitions.extensions import GraphMachine
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import  (
@@ -57,7 +58,7 @@ class RobotMachine(object):
         ]
         self.user_id = user_id
 
-        self.machine = Machine(
+        self.machine = GraphMachine(
             model=self, 
             states=self.state,
             initial="start"
@@ -227,7 +228,7 @@ class RobotMachine(object):
             else: 
                 graph.edge(relation[0], relation[1])
         graph.format = "png"
-        graph.render(self.user_id, view=False)
+        graph.render(self.user_id, view=False, outfile=None)
         print("render successfully")
         im = pyimgur.Imgur(settings.IMGUR_CLIENT_ID)
         path = self.user_id + ".png"
