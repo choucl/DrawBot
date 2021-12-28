@@ -129,8 +129,8 @@ class RobotMachine(object):
         self.message_q.append(TextSendMessage(message[:]))
         message = \
             "$ You could also use these instructions to construct relations: \n" \
-            "- node1 ---> node2\n" \
-            "- node3 --edge-> node4"
+            "- node1 -> node2\n" \
+            "- node3 -edge> node4"
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
         self.line_bot_reply()
 

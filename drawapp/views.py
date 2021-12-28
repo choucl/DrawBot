@@ -7,6 +7,8 @@ from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import  (
     MessageEvent,
+    JoinEvent,
+    FollowEvent,
     TextSendMessage,
     TemplateSendMessage,
     ButtonsTemplate,
@@ -48,38 +50,44 @@ def callback(request):
                 user_id = event.source.group_id
             else:
                 user_id = event.source.user_id
+
             # check if is new user and initiate
             if (not user_id in user_map):
                 user_map[user_id] = RobotMachine(user_id)
                 user_map[user_id].get_graph().draw('my_state_diagram.png', prog='dot')
 
+            if (isinstance(event, JoinEvent) or isinstance(event, FollowEvent)):
+                user_map[user_id].reply_token = event.reply_token
+                user_map[user_id].to_start()
+                return HttpResponse()
+
             user_map[user_id].reply_token = event.reply_token
             if (user_map[user_id].is_start()):
-                # start state
+                # start state, input graph type
                 start_transition(event, user_id)
             elif (user_map[user_id].is_ready()):
-                # graph type state
+                # ready state, input relation or node
                 input_transition(event, user_id, 0)
             elif (user_map[user_id].is_node1()):
-                # graph type state
+                # node1 state, input second node
                set_cur_transition(event, user_id, 1)
             elif (user_map[user_id].is_node2()):
-                # graph type state
+                # node2 state, input if there's label name
                 yes_no_transition(event, user_id)
                 if (user_map[user_id].is_other()):
                     user_map[user_id].relations.append(user_map[user_id].cur_relation[:])
             elif (user_map[user_id].is_label()):
-                # graph type state
+                # label state, input label name
                set_cur_transition(event, user_id, 2)
             elif (user_map[user_id].is_other()):
-                # graph type state
+                # other state, input if there's other node connected to node1
                yes_no_transition(event, user_id)
                user_map[user_id].cur_relation[2] = ""
             elif (user_map[user_id].is_input()):
-                # state for input node-edge relation
+                # input state, input relation or node
                 input_transition(event, user_id, 1)
             elif (user_map[user_id].is_gen()):
-                # state for choosing if the last input need to be colored
+                # generate graph state, input continue or not
                 gen_transition(event, user_id)
                     
         return HttpResponse()
@@ -120,8 +128,8 @@ def line_parse(str):
     else:
         if (split[1] == '->'):
             return (True, (split[0], split[2], ""))
-        elif (split[1][:1] == '-' and split[1][-1:] == '>'):
-            return (True, (split[0], split[2], split[1][2:-2]))
+        elif (split[1][0] == '-' and split[1][-1] == '>'):
+            return (True, (split[0], split[2], split[1][1:-1]))
         else:
             return (False, ())
 
@@ -206,3 +214,4 @@ def gen_transition(event, user_id):
                     )
                 )
             )
+        user_map[user_id].line_bot_reply()
