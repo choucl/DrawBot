@@ -188,7 +188,7 @@ def ready_transition(event, user_id):
         user_map[user_id].message_q.append(
             TextSendMessage(text=message, emojis=hint_emoji)
         )
-        user_map[user_id].unrecognized()
+        user_map[user_id].enter_check()
     elif (event.message.text.lower() == 'deletion'
             and len(user_map[user_id].relations) > 0):
         user_map[user_id].enter_del()

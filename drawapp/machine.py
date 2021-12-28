@@ -72,6 +72,7 @@ class RobotMachine(object):
         self.machine.add_transition("enter_input",    "ready", "input")
         self.machine.add_transition("enter_generate", "ready", "gen")
         self.machine.add_transition("enter_del",      "ready", "delete")
+        self.machine.add_transition("enter_check",    "ready", "ready")
         self.machine.add_transition("unrecognized",   "ready", "ready")
         self.machine.add_transition("enter_number",   "delete", "ready")
         self.machine.add_transition("unrecognized",   "delete", "delete")
@@ -86,8 +87,8 @@ class RobotMachine(object):
         self.machine.add_transition("unrecognized",   "other", "other")
         self.machine.add_transition("enter_relation", "input", "ready")
         self.machine.add_transition("enter_node",     "input", "node1")
+        self.machine.add_transition("enter_continue", "gen",   "ready")
         self.machine.add_transition("unrecognized",   "input", "input")
-        self.machine.add_transition("enter_continue", "gen",   "input")
         self.machine.add_transition("enter_restart",  "gen",   "start")
 
         self.reply_token = ""
@@ -107,7 +108,7 @@ class RobotMachine(object):
         message = "$ Current Input status:"
         count = 1
         for element in self.relations:
-            message += "\n" + str(count) + ". " + element[0]
+            message += "\n" + str(count) + ".  " + element[0]
             if (element[2] != ""):
                 message += " -" + element[2] + "> "
             else:
@@ -142,7 +143,7 @@ class RobotMachine(object):
 
     def _on_enter_ready(self):
         print("enter ready")
-        message = "Choose your behavior!"
+        message = "Choose an option!"
         self.message_q.append(TextSendMessage(message[:]))
         actions=[
             MessageTemplateAction(
@@ -168,9 +169,9 @@ class RobotMachine(object):
 
         self.message_q.append(
             TemplateSendMessage(
-                alt_text="Choose behavior",
+                alt_text="Choose an option",
                 template=ButtonsTemplate(
-                    title='Choose behavior',
+                    title='Choose an option',
                     text="Choose what you want to do to the graph",
                     actions=actions
                 )
@@ -297,7 +298,7 @@ class RobotMachine(object):
             TemplateSendMessage(
                 alt_text="What's next?",
                 template=ButtonsTemplate(
-                    title='Next behavior',
+                    title='Next step',
                     text="What's next?",
                     actions=[
                         MessageTemplateAction(
