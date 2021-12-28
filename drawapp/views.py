@@ -45,7 +45,6 @@ def callback(request):
             return HttpResponseBadRequest()
  
         for event in events: 
-            print(event.source.type)
             if (event.source.type == "group"):
                 user_id = event.source.group_id
             else:
@@ -105,15 +104,15 @@ def parse(str):
             if tmp[0] == False:
                 return ("error", [])
             else:
-                parse_result.append(tmp)
+                parse_result.extend(tmp[1])
         parse_state = "relation"
     else:
         tmp = line_parse(str)
         if (tmp[0]):
-            parse_result.append(tmp)
+            parse_result.extend(tmp[1])
             parse_state = "relation"
         else:
-            parse_result.append(tmp)
+            parse_result.extend(tmp[1])
             parse_state = "node"
     return (parse_state, parse_result)
 
@@ -121,17 +120,32 @@ def parse(str):
 # parse the user input string
 # input: string
 # output: tuple, (success or not, tokenize result)
+# def line_parse(str):
+#     split = str.split()
+#     if len(split) != 3:
+#         return (False, ())
+#     else:
+#         if (split[1] == '->'):
+#             return (True, (split[0], split[2], ""))
+#         elif (split[1][0] == '-' and split[1][-1] == '>'):
+#             return (True, (split[0], split[2], split[1][1:-1]))
+#         else:
+#             return (False, ())
+# 
 def line_parse(str):
     split = str.split()
-    if len(split) != 3:
+    if (len(split) % 2) == 0:
         return (False, ())
     else:
-        if (split[1] == '->'):
-            return (True, (split[0], split[2], ""))
-        elif (split[1][0] == '-' and split[1][-1] == '>'):
-            return (True, (split[0], split[2], split[1][1:-1]))
-        else:
-            return (False, ())
+        relations = []
+        for i in range(0, len(split) - 2, 2):
+            if (split[i + 1] == '->'):
+                relations.append((split[i], split[i + 2], ""))
+            elif (split[i + 1][0] == '-' and split[i + 1][-1] == '>'):
+                relations.append((split[i], split[i + 2], split[i + 1][1:-1]))
+            else:
+                return (False, [])
+        return (True, relations)
 
 def start_transition(event, user_id):
     message = ""
@@ -156,7 +170,6 @@ def set_cur_transition(event, user_id, pos):
 
 def yes_no_transition(event, user_id):
     message = ""
-    print(event.message.text.lower())
     if (event.message.text.lower() == 'yes'):
         user_map[user_id].enter_yes()
     elif (event.message.text.lower() == 'no'):
@@ -173,7 +186,7 @@ def input_transition(event, user_id, is_ready):
     parse_result = parse(event.message.text)
     if (parse_result[0] == "relation"):
         for result in parse_result[1]:
-            user_map[user_id].relations.append(result[1])
+            user_map[user_id].relations.append(result)
         user_map[user_id].enter_relation()
     elif (parse_result[0] == "node"):
         user_map[user_id].cur_relation[0] = event.message.text 

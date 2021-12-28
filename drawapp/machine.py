@@ -220,7 +220,7 @@ class RobotMachine(object):
 
     def _on_enter_gen(self):
         print("enter gen")
-        if self.graph_type == "directd":
+        if self.graph_type == "directed":
             graph = Digraph()
         else:
             graph = Graph()
