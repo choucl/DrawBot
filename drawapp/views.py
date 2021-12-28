@@ -22,6 +22,13 @@ from drawapp.machine import RobotMachine
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 user_map = {}
+hint_emoji = [
+    {
+        "index": 0,
+        "productId": "5ac22b23040ab15980c9b44d",
+        "emojiId": "022"
+    }
+]
 cross_emoji = [
     {
         "index": 0,
@@ -66,7 +73,10 @@ def callback(request):
                 start_transition(event, user_id)
             elif (user_map[user_id].is_ready()):
                 # ready state, input relation or node
-                input_transition(event, user_id, 0)
+                ready_transition(event, user_id)
+            elif (user_map[user_id].is_delete()):
+                # ready state, input relation or node
+                delete_transition(event, user_id)
             elif (user_map[user_id].is_node1()):
                 # node1 state, input second node
                set_cur_transition(event, user_id, 1)
@@ -84,7 +94,7 @@ def callback(request):
                user_map[user_id].cur_relation[2] = ""
             elif (user_map[user_id].is_input()):
                 # input state, input relation or node
-                input_transition(event, user_id, 1)
+                input_transition(event, user_id)
             elif (user_map[user_id].is_gen()):
                 # generate graph state, input continue or not
                 gen_transition(event, user_id)
@@ -117,24 +127,9 @@ def parse(str):
     return (parse_state, parse_result)
 
 
-# parse the user input string
-# input: string
-# output: tuple, (success or not, tokenize result)
-# def line_parse(str):
-#     split = str.split()
-#     if len(split) != 3:
-#         return (False, ())
-#     else:
-#         if (split[1] == '->'):
-#             return (True, (split[0], split[2], ""))
-#         elif (split[1][0] == '-' and split[1][-1] == '>'):
-#             return (True, (split[0], split[2], split[1][1:-1]))
-#         else:
-#             return (False, ())
-# 
 def line_parse(str):
     split = str.split()
-    if (len(split) % 2) == 0:
+    if (len(split) % 2) == 0 or len(split) < 3:
         return (False, ())
     else:
         relations = []
@@ -151,13 +146,17 @@ def start_transition(event, user_id):
     message = ""
     if (event.message.text.lower() == 'directed'):
         user_map[user_id].graph_type = 'directed' 
+        message = "Type directed chosen."
         user_map[user_id].enter_type()
     elif (event.message.text.lower() == 'undirected'):
         user_map[user_id].graph_type = 'undirected'
+        message = "Type undirected chosen."
         user_map[user_id].enter_type()
     else:
         message = "$ Unrecogized graph type\nPlease choose directed or undirected graph"
-        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
         user_map[user_id].unrecognized()
         
 def set_cur_transition(event, user_id, pos):
@@ -176,13 +175,58 @@ def yes_no_transition(event, user_id):
         user_map[user_id].enter_no()
     else:
         message = "$ Unrecogized input\nPlease choose yes or no"
-        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
         user_map[user_id].unrecognized()
 
-def input_transition(event, user_id, is_ready):
-    if (is_ready and event.message.text.lower() == "ok"):
-        user_map[user_id].enter_ok()
-        return
+def ready_transition(event, user_id):
+    if (event.message.text.lower() == 'relation'):
+        user_map[user_id].enter_input()
+    elif (event.message.text.lower() == 'check'):
+        message = user_map[user_id].get_cur_relation()
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=hint_emoji)
+        )
+        user_map[user_id].unrecognized()
+    elif (event.message.text.lower() == 'deletion'
+            and len(user_map[user_id].relations) > 0):
+        user_map[user_id].enter_del()
+    elif (event.message.text.lower() == 'generate'
+            and len(user_map[user_id].relations) > 0):
+        user_map[user_id].enter_generate()
+    else:
+        message = "$ Unrecogized input\nPlease choose again"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+
+def delete_transition(event, user_id):
+    value = 0
+    try:
+        value = int(event.message.text)
+    except ValueError:
+        # Handle the exception
+        message = "$ Unrecognized input\nPlease a numeric value"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+
+    relation_len = len(user_map[user_id].relations)
+    if (value <= relation_len and value > 0):
+        del user_map[user_id].relations[value - 1]
+        user_map[user_id].enter_number()
+    else:
+        message = "$ Invalid number\nPlease number between 1 and " + str(relation_len)
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+        
+
+def input_transition(event, user_id):
     parse_result = parse(event.message.text)
     if (parse_result[0] == "relation"):
         for result in parse_result[1]:
@@ -193,7 +237,9 @@ def input_transition(event, user_id, is_ready):
         user_map[user_id].enter_node()
     else:
         message = "$ Unrecognized input\nPlease input again!"
-        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
         user_map[user_id].unrecognized()
 
 def gen_transition(event, user_id):
@@ -207,7 +253,9 @@ def gen_transition(event, user_id):
         return
     else:
         message = "$ Unrecognized input\nPlease input again!"
-        user_map[user_id].message_q.append(TextSendMessage(text=message, emojis=cross_emoji))
+        user_map[user_id].message_q.append(
+                TextSendMessage(text=message, emojis=cross_emoji)
+        )
         user_map[user_id].message_q.append(
                 TemplateSendMessage(
                     alt_text="What's next?",
