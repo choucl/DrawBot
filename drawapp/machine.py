@@ -199,9 +199,9 @@ class RobotMachine(object):
         for element in self.relations:
             message += "\n" + element[0]
             if (element[2] != ""):
-                message += " --" + element[2] + "-> "
+                message += " -" + element[2] + "> "
             else:
-                message += " ---> "
+                message += " -> "
             message +=  element[1]
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
 
@@ -210,8 +210,8 @@ class RobotMachine(object):
 
         message = \
             "$ You could also use these instructions to construct relations: \n" \
-            "- node1 ---> node2\n" \
-            "- node3 --edge-> node4"
+            "- node1 -> node2\n" \
+            "- node3 -edge> node4"
         self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
 
         self.line_bot_reply()
@@ -220,7 +220,7 @@ class RobotMachine(object):
 
     def _on_enter_gen(self):
         print("enter gen")
-        if self.graph_type == "direction":
+        if self.graph_type == "directd":
             graph = Digraph()
         else:
             graph = Graph()

@@ -74,7 +74,7 @@ def callback(request):
             elif (user_map[user_id].is_other()):
                 # graph type state
                yes_no_transition(event, user_id)
-               user_map[user_id].cur_relation = ["", "", ""]
+               user_map[user_id].cur_relation[2] = ""
             elif (user_map[user_id].is_input()):
                 # state for input node-edge relation
                 input_transition(event, user_id, 1)
@@ -118,9 +118,9 @@ def line_parse(str):
     if len(split) != 3:
         return (False, ())
     else:
-        if (split[1] == '--->'):
+        if (split[1] == '->'):
             return (True, (split[0], split[2], ""))
-        elif (split[1][:2] == '--' and split[1][-2:] == '->'):
+        elif (split[1][:1] == '-' and split[1][-1:] == '>'):
             return (True, (split[0], split[2], split[1][2:-2]))
         else:
             return (False, ())
@@ -167,7 +167,7 @@ def input_transition(event, user_id, is_ready):
         for result in parse_result[1]:
             user_map[user_id].relations.append(result[1])
         user_map[user_id].enter_relation()
-    elif (parse_result[1] == "node"):
+    elif (parse_result[0] == "node"):
         user_map[user_id].cur_relation[0] = event.message.text 
         user_map[user_id].enter_node()
     else:
