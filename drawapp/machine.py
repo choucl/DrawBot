@@ -55,6 +55,15 @@ class RobotMachine(object):
                 "name": "other",
                 "on_enter": self._on_enter_other
             }, {
+                "name": "coloring",
+                "on_enter": self._on_enter_coloring
+            }, {
+                "name": "color_input",
+                "on_enter": self._on_enter_color_input
+            }, {
+                "name": "node_input",
+                "on_enter": self._on_enter_node_input
+            }, {
                 "name": "gen",
                 "on_enter": self._on_enter_gen
             }
@@ -72,8 +81,9 @@ class RobotMachine(object):
         self.machine.add_transition("enter_dir",      "dir",   "ready")
         self.machine.add_transition("unrecognized",   "dir",   "dir")
         self.machine.add_transition("enter_input",    "ready", "input")
-        self.machine.add_transition("enter_generate", "ready", "gen")
+        self.machine.add_transition("enter_generate", "ready", "coloring")
         self.machine.add_transition("enter_del",      "ready", "delete")
+        self.machine.add_transition("enter_restart",  "ready", "start")
         self.machine.add_transition("unrecognized",   "ready", "ready")
         self.machine.add_transition("enter_number",   "delete", "ready")
         self.machine.add_transition("unrecognized",   "delete", "delete")
@@ -88,15 +98,25 @@ class RobotMachine(object):
         self.machine.add_transition("unrecognized",   "other", "other")
         self.machine.add_transition("enter_relation", "input", "ready")
         self.machine.add_transition("enter_node",     "input", "node1")
-        self.machine.add_transition("enter_continue", "gen",   "ready")
         self.machine.add_transition("unrecognized",   "input", "input")
+        self.machine.add_transition("enter_yes",      "coloring", "color_input")
+        self.machine.add_transition("enter_no",       "coloring", "gen")
+        self.machine.add_transition("unrecognized",   "coloring", "coloring")
+        self.machine.add_transition("enter_color",    "color_input", "node_input")
+        self.machine.add_transition("enter_ok",       "color_input", "gen")
+        self.machine.add_transition("unrecognized",   "color_input", "color_input")
+        self.machine.add_transition("enter_node",     "node_input", "color_input")
+        self.machine.add_transition("unrecognized",   "node_input", "node_input")
+        self.machine.add_transition("enter_continue", "gen",   "ready")
         self.machine.add_transition("enter_restart",  "gen",   "start")
 
         self.reply_token = ""
         self.graph_type = ""
         self.graph_dir = ""
+        self.cur_color = ""
         self.cur_relation = ["", "", ""]
         self.relations = []
+        self.nodes = []
         self.message_q = []
 
     def line_bot_reply(self):
@@ -119,6 +139,22 @@ class RobotMachine(object):
             count += 1
         if (len(self.relations) == 0):
             message += "\n(none)"
+        return message
+
+    def get_cur_nodes(self):
+        message = "$ Node list:"
+        count = 1
+        for node in self.nodes:
+            message += "\n" + str(count) + ".  " + node[0] + "  " 
+            if (node[1] == "white"):
+                message += "⚪"
+            elif (node[1] == "blue"):
+                message += "🔵"
+            elif (node[1] == "green"):
+                message += "🟢"
+            elif (node[1] == "yellow"):
+                message += "🟡"
+            count += 1
         return message
 
 
@@ -180,7 +216,7 @@ class RobotMachine(object):
             MessageTemplateAction(
                 label='Add Relation',
                 text='relation'
-            )
+            ),
         ]
         if(len(self.relations) > 0):
             actions.extend([
@@ -193,7 +229,12 @@ class RobotMachine(object):
                     text='generate'
                 )
             ])
-
+        actions.append(
+            MessageTemplateAction(
+                label='Restart',
+                text='restart'
+            )
+        )
         self.message_q.append(
             TemplateSendMessage(
                 alt_text="Choose an option",
@@ -289,6 +330,87 @@ class RobotMachine(object):
 
         self.line_bot_reply()
 
+    
+    def _on_enter_coloring(self):
+        print("enter coloring")
+        for relation in self.relations:
+            if (not relation[0] in [item[0] for item in self.nodes]):
+                self.nodes.append([relation[0], "white"])
+            if (not relation[1] in [item[0] for item in self.nodes]):
+                self.nodes.append([relation[1], "white"])
+
+        self.message_q.append(
+            TemplateSendMessage(
+                alt_text="Do you want to color the nodes?",
+                template=ButtonsTemplate(
+                    title='Color node',
+                    text="Do you want to color the nodes?",
+                    actions=[
+                        MessageTemplateAction(
+                            label='Yes',
+                            text='yes'
+                        ),
+                        MessageTemplateAction(
+                            label='No',
+                            text='no'
+                        )
+                    ]
+                )
+            )
+        )
+        self.line_bot_reply()
+
+    def _on_enter_color_input(self):
+        print("enter color input")
+
+        message = self.get_cur_nodes()
+        self.message_q.append(
+            TextSendMessage(text=message[:], emojis=hint_emoji)
+        )
+
+        self.message_q.append(
+            TemplateSendMessage(
+                alt_text="Enter color",
+                template=ButtonsTemplate(
+                    title='Pick a color',
+                    text="Pick a color from below or finish coloring",
+                    actions=[
+                        MessageTemplateAction(
+                            label='🟡 Yellow',
+                            text='yellow'
+                        ),
+                        MessageTemplateAction(
+                            label='🟢 Green',
+                            text='green'
+                        ),
+                        MessageTemplateAction(
+                            label='🔵 Blue',
+                            text='blue'
+                        ),
+                        MessageTemplateAction(
+                            label='Done',
+                            text='done'
+                        ),
+                    ]
+                )
+            )
+        )
+        self.line_bot_reply()
+
+    def _on_enter_node_input(self):
+        print("enter node input")
+
+        message = self.get_cur_nodes()
+        self.message_q.append(
+            TextSendMessage(text=message[:], emojis=hint_emoji)
+        )
+
+        message = "Please enter node number from the above list.\nYou could seperate"\
+                "different nodes with spaces"
+        self.message_q.append(
+            TextSendMessage(text=message)
+        )
+        self.line_bot_reply()
 
 
     def _on_enter_gen(self):
@@ -299,10 +421,10 @@ class RobotMachine(object):
             graph = Graph()
             
         graph.graph_attr["rankdir"] = self.graph_dir
+        for node in self.nodes:
+            graph.node(node[0], node[0], style='filled', fillcolor=node[1])
         for relation in self.relations:
             print(relation)
-            graph.node(relation[0], relation[0])
-            graph.node(relation[1], relation[1])
             if (relation[2] != ""):
                 graph.edge(relation[0], relation[1], relation[2])
             else: 

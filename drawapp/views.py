@@ -72,13 +72,13 @@ def callback(request):
                 # start state, input graph type
                 start_transition(event, user_id)
             elif (user_map[user_id].is_dir()):
-                # ready state, input relation or node
+                # direction state
                 dir_transition(event, user_id)
             elif (user_map[user_id].is_ready()):
                 # ready state, input relation or node
                 ready_transition(event, user_id)
             elif (user_map[user_id].is_delete()):
-                # ready state, input relation or node
+                # delete state
                 delete_transition(event, user_id)
             elif (user_map[user_id].is_node1()):
                 # node1 state, input second node
@@ -98,6 +98,12 @@ def callback(request):
             elif (user_map[user_id].is_input()):
                 # input state, input relation or node
                 input_transition(event, user_id)
+            elif (user_map[user_id].is_coloring()):
+                yes_no_transition(event, user_id)
+            elif (user_map[user_id].is_color_input()):
+                color_input_transition(event, user_id)
+            elif (user_map[user_id].is_node_input()):
+                node_input_transition(event, user_id)
             elif (user_map[user_id].is_gen()):
                 # generate graph state, input continue or not
                 gen_transition(event, user_id)
@@ -201,6 +207,14 @@ def dir_transition(event, user_id):
 def ready_transition(event, user_id):
     if (event.message.text.lower() == 'relation'):
         user_map[user_id].enter_input()
+    elif (event.message.text.lower() == 'restart'):
+        message = "$ DrawBot restarted!"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=hint_emoji)
+        )
+        user_map[user_id].enter_restart()
+        user_map[user_id].relations = []
+        user_map[user_id].nodes = []
     elif (event.message.text.lower() == 'deletion'
             and len(user_map[user_id].relations) > 0):
         user_map[user_id].enter_del()
@@ -253,6 +267,39 @@ def input_transition(event, user_id):
             TextSendMessage(text=message, emojis=cross_emoji)
         )
         user_map[user_id].unrecognized()
+        
+def color_input_transition(event, user_id):
+    input = event.message.text.lower()
+    if (input == "yellow" or input == "blue" or input == "green"):
+        user_map[user_id].cur_color = input
+        user_map[user_id].enter_color()
+    elif (input == "done"):
+        user_map[user_id].enter_ok()
+    else:
+        message = "$ Unrecognized input\nPlease input again!"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+
+def node_input_transition(event, user_id):
+    split = event.message.text.split()
+    node_len = len(user_map[user_id].nodes)
+    for node in split:
+        try:
+            node_i = int(node) - 1
+            if (node_i < node_len and node_i >= 0):
+                user_map[user_id].nodes[node_i][1] = user_map[user_id].cur_color
+        except ValueError:
+            # Handle the exception
+            message = "$ Unrecognized input\nPlease enter numeric value"
+            user_map[user_id].message_q.append(
+                TextSendMessage(text=message, emojis=cross_emoji)
+            )
+            user_map[user_id].unrecognized()
+            return
+    user_map[user_id].enter_node()
+
 
 def gen_transition(event, user_id):
     if (event.message.text.lower() == "continue"):
@@ -262,6 +309,7 @@ def gen_transition(event, user_id):
         user_map[user_id].enter_restart()
         user_map[user_id].graph_type = ""
         user_map[user_id].relations = []
+        user_map[user_id].nodes = []
         return
     else:
         message = "$ Unrecognized input\nPlease input again!"
