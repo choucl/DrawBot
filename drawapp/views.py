@@ -183,12 +183,6 @@ def yes_no_transition(event, user_id):
 def ready_transition(event, user_id):
     if (event.message.text.lower() == 'relation'):
         user_map[user_id].enter_input()
-    elif (event.message.text.lower() == 'check'):
-        message = user_map[user_id].get_cur_relation()
-        user_map[user_id].message_q.append(
-            TextSendMessage(text=message, emojis=hint_emoji)
-        )
-        user_map[user_id].enter_check()
     elif (event.message.text.lower() == 'deletion'
             and len(user_map[user_id].relations) > 0):
         user_map[user_id].enter_del()

@@ -72,7 +72,6 @@ class RobotMachine(object):
         self.machine.add_transition("enter_input",    "ready", "input")
         self.machine.add_transition("enter_generate", "ready", "gen")
         self.machine.add_transition("enter_del",      "ready", "delete")
-        self.machine.add_transition("enter_check",    "ready", "ready")
         self.machine.add_transition("unrecognized",   "ready", "ready")
         self.machine.add_transition("enter_number",   "delete", "ready")
         self.machine.add_transition("unrecognized",   "delete", "delete")
@@ -115,6 +114,8 @@ class RobotMachine(object):
                 message += " -> "
             message +=  element[1]
             count += 1
+        if (len(self.relations) == 0):
+            message += "\n(none)"
         return message
 
 
@@ -143,13 +144,13 @@ class RobotMachine(object):
 
     def _on_enter_ready(self):
         print("enter ready")
+        message = self.get_cur_relation()
+        self.message_q.append(
+            TextSendMessage(message[:], emojis=hint_emoji)
+        )
         message = "Choose an option!"
         self.message_q.append(TextSendMessage(message[:]))
         actions=[
-            MessageTemplateAction(
-                label='Check relations',
-                text='check'
-            ),
             MessageTemplateAction(
                 label='Add Relation',
                 text='relation'
