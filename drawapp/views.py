@@ -71,6 +71,9 @@ def callback(request):
             if (user_map[user_id].is_start()):
                 # start state, input graph type
                 start_transition(event, user_id)
+            elif (user_map[user_id].is_dir()):
+                # ready state, input relation or node
+                dir_transition(event, user_id)
             elif (user_map[user_id].is_ready()):
                 # ready state, input relation or node
                 ready_transition(event, user_id)
@@ -179,6 +182,21 @@ def yes_no_transition(event, user_id):
             TextSendMessage(text=message, emojis=cross_emoji)
         )
         user_map[user_id].unrecognized()
+
+def dir_transition(event, user_id):
+    if (event.message.text.upper() == "TD"):
+        user_map[user_id].graph_dir = "TD"
+        user_map[user_id].enter_dir()
+    elif (event.message.text.upper() == "LR"):
+        user_map[user_id].graph_dir = "LR"
+        user_map[user_id].enter_dir()
+    else:
+        message = "$ Unrecogized input\nPlease choose again"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+
 
 def ready_transition(event, user_id):
     if (event.message.text.lower() == 'relation'):

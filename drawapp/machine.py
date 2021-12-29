@@ -1,10 +1,7 @@
 from django.conf import settings
-from transitions import Machine
 from transitions.extensions import GraphMachine
 from linebot import LineBotApi, WebhookParser
-from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import  (
-    MessageEvent,
     TextSendMessage,
     TemplateSendMessage,
     ImageSendMessage,
@@ -33,6 +30,9 @@ class RobotMachine(object):
             {
                 "name": "start",
                 "on_enter": self._on_enter_start
+            }, {
+                "name": "dir",
+                "on_enter": self._on_enter_dir
             }, {
                 "name": "ready",
                 "on_enter": self._on_enter_ready
@@ -67,8 +67,10 @@ class RobotMachine(object):
             initial="start"
         )
 
-        self.machine.add_transition("enter_type",     "start", "ready")
+        self.machine.add_transition("enter_type",     "start", "dir")
         self.machine.add_transition("unrecognized",   "start", "start")
+        self.machine.add_transition("enter_dir",      "dir",   "ready")
+        self.machine.add_transition("unrecognized",   "dir",   "dir")
         self.machine.add_transition("enter_input",    "ready", "input")
         self.machine.add_transition("enter_generate", "ready", "gen")
         self.machine.add_transition("enter_del",      "ready", "delete")
@@ -92,6 +94,7 @@ class RobotMachine(object):
 
         self.reply_token = ""
         self.graph_type = ""
+        self.graph_dir = ""
         self.cur_relation = ["", "", ""]
         self.relations = []
         self.message_q = []
@@ -135,6 +138,29 @@ class RobotMachine(object):
                         MessageTemplateAction(
                             label='Undirected graph',
                             text='undirected'
+                        )
+                    ]
+                )
+            )
+        )
+        self.line_bot_reply()
+
+    def _on_enter_dir(self):
+        print("enter dir")
+        self.message_q.append(
+            TemplateSendMessage(
+                alt_text="Choose graph direction",
+                template=ButtonsTemplate(
+                    title='Direction',
+                    text='Please choose the direction of the graph',
+                    actions=[
+                        MessageTemplateAction(
+                            label='Top-Down',
+                            text='TD'
+                        ),
+                        MessageTemplateAction(
+                            label='Left-Right',
+                            text='LR'
                         )
                     ]
                 )
@@ -272,7 +298,7 @@ class RobotMachine(object):
         else:
             graph = Graph()
             
-        graph.graph_attr["rankdir"]="LR"
+        graph.graph_attr["rankdir"] = self.graph_dir
         for relation in self.relations:
             print(relation)
             graph.node(relation[0], relation[0])
