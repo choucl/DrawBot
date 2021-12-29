@@ -270,7 +270,7 @@ def input_transition(event, user_id):
         
 def color_input_transition(event, user_id):
     input = event.message.text.lower()
-    if (input == "yellow" or input == "blue" or input == "green"):
+    if (input == "yellow" or input == "cyan" or input == "green"):
         user_map[user_id].cur_color = input
         user_map[user_id].enter_color()
     elif (input == "done"):

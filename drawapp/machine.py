@@ -148,7 +148,7 @@ class RobotMachine(object):
             message += "\n" + str(count) + ".  " + node[0] + "  " 
             if (node[1] == "white"):
                 message += "⚪"
-            elif (node[1] == "blue"):
+            elif (node[1] == "cyan"):
                 message += "🔵"
             elif (node[1] == "green"):
                 message += "🟢"
@@ -384,8 +384,8 @@ class RobotMachine(object):
                             text='green'
                         ),
                         MessageTemplateAction(
-                            label='🔵 Blue',
-                            text='blue'
+                            label='🔵 Cyan',
+                            text='cyan'
                         ),
                         MessageTemplateAction(
                             label='Done',
