@@ -11,7 +11,6 @@ from linebot.models import  (
 
 from graphviz import Graph, Digraph
 import pyimgur
-import os
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
@@ -69,6 +68,9 @@ class RobotMachine(object):
             }, {
                 "name": "gen",
                 "on_enter": self._on_enter_gen
+            }, {
+                "name": "wait",
+                "on_enter": self._on_enter_wait
             }
         ]
         self.user_id = user_id
@@ -112,8 +114,11 @@ class RobotMachine(object):
         self.machine.add_transition("unrecognized",   "color_input", "color_input")
         self.machine.add_transition("enter_node",     "node_input", "color_input")
         self.machine.add_transition("unrecognized",   "node_input", "node_input")
-        self.machine.add_transition("enter_continue", "gen",   "ready")
-        self.machine.add_transition("enter_restart",  "gen",   "start")
+        self.machine.add_transition("go_wait",        "gen", "wait")
+        self.machine.add_transition("enter_continue", "wait", "ready")
+        self.machine.add_transition("enter_get_link", "wait", "wait")
+        self.machine.add_transition("enter_restart",  "wait", "start")
+        self.machine.add_transition("unrecognized",   "wait", "wait")
 
         self.reply_token = ""
         self.graph_type = ""
@@ -470,16 +475,20 @@ class RobotMachine(object):
         graph.render(self.user_id, view=False, directory='dot-output')
         print("render successfully")
 
-        im = pyimgur.Imgur(settings.IMGUR_CLIENT_ID)
         path = "dot-output/" + self.user_id + ".png"
+        im = pyimgur.Imgur(settings.IMGUR_CLIENT_ID)
         uploaded_image = im.upload_image(path)
+        self.upload_link = uploaded_image.link
         self.message_q.append(
             ImageSendMessage(
                 original_content_url=uploaded_image.link,
                 preview_image_url=uploaded_image.link
             )
         )
+        self.go_wait()
 
+    def _on_enter_wait(self):
+        print("enter wait")
         self.message_q.append(
             TemplateSendMessage(
                 alt_text="What's next?",
@@ -487,6 +496,10 @@ class RobotMachine(object):
                     title='Next step',
                     text="What's next?",
                     actions=[
+                        MessageTemplateAction(
+                            label='Get image link',
+                            text='get link'
+                        ),
                         MessageTemplateAction(
                             label='Continue',
                             text='continue'

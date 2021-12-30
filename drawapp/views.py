@@ -9,10 +9,7 @@ from linebot.models import  (
     MessageEvent,
     JoinEvent,
     FollowEvent,
-    TextSendMessage,
-    TemplateSendMessage,
-    ButtonsTemplate,
-    MessageTemplateAction
+    TextSendMessage
 ) 
 
 from drawapp.machine import RobotMachine
@@ -106,9 +103,9 @@ def callback(request):
             elif (user_map[user_id].is_node_input()):
                 # node input state, choose nodes
                 node_input_transition(event, user_id)
-            elif (user_map[user_id].is_gen()):
+            elif (user_map[user_id].is_wait()):
                 # generate graph state, input continue or not
-                gen_transition(event, user_id)
+                wait_transition(event, user_id)
                     
         return HttpResponse()
     else:
@@ -316,10 +313,16 @@ def node_input_transition(event, user_id):
     user_map[user_id].enter_node()
 
 
-def gen_transition(event, user_id):
+def wait_transition(event, user_id):
     if (event.message.text.lower() == "continue"):
         user_map[user_id].enter_continue()
         return
+    elif (event.message.text.lower() == "get link"):
+        message = user_map[user_id].upload_link
+        user_map[user_id].message_q.append(
+                TextSendMessage(text=message)
+        )
+        user_map[user_id].enter_get_link() 
     elif (event.message.text.lower() == "restart"):
         user_map[user_id].enter_restart()
         user_map[user_id].graph_type = ""
@@ -331,23 +334,4 @@ def gen_transition(event, user_id):
         user_map[user_id].message_q.append(
                 TextSendMessage(text=message, emojis=cross_emoji)
         )
-        user_map[user_id].message_q.append(
-                TemplateSendMessage(
-                    alt_text="What's next?",
-                    template=ButtonsTemplate(
-                        title='Types',
-                        text="What's next?",
-                        actions=[
-                            MessageTemplateAction(
-                                label='Continue',
-                                text='continue'
-                            ),
-                            MessageTemplateAction(
-                                label='Restart',
-                                text='restart'
-                            )
-                        ]
-                    )
-                )
-            )
-        user_map[user_id].line_bot_reply()
+        user_map[user_id].unrecognized()
