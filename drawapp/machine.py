@@ -34,6 +34,9 @@ class RobotMachine(object):
                 "name": "dir",
                 "on_enter": self._on_enter_dir
             }, {
+                "name": "shape",
+                "on_enter": self._on_enter_shape
+            }, {
                 "name": "ready",
                 "on_enter": self._on_enter_ready
             }, {
@@ -78,8 +81,10 @@ class RobotMachine(object):
 
         self.machine.add_transition("enter_type",     "start", "dir")
         self.machine.add_transition("unrecognized",   "start", "start")
-        self.machine.add_transition("enter_dir",      "dir",   "ready")
+        self.machine.add_transition("enter_dir",      "dir",   "shape")
         self.machine.add_transition("unrecognized",   "dir",   "dir")
+        self.machine.add_transition("enter_shape",    "shape", "ready")
+        self.machine.add_transition("unrecognized",   "shape", "shape")
         self.machine.add_transition("enter_input",    "ready", "input")
         self.machine.add_transition("enter_generate", "ready", "coloring")
         self.machine.add_transition("enter_del",      "ready", "delete")
@@ -113,6 +118,7 @@ class RobotMachine(object):
         self.reply_token = ""
         self.graph_type = ""
         self.graph_dir = ""
+        self.node_shape = ""
         self.cur_color = ""
         self.cur_relation = ["", "", ""]
         self.relations = []
@@ -127,7 +133,7 @@ class RobotMachine(object):
         self.message_q = []
 
     def get_cur_relation(self):
-        message = "$ Current Input status:"
+        message = "📃 Current Input relations:"
         count = 1
         for element in self.relations:
             message += "\n" + str(count) + ".  " + element[0]
@@ -142,7 +148,7 @@ class RobotMachine(object):
         return message
 
     def get_cur_nodes(self):
-        message = "$ Node list:"
+        message = "📃 Node list:"
         count = 1
         for node in self.nodes:
             message += "\n" + str(count) + ".  " + node[0] + "  " 
@@ -204,11 +210,42 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
+    def _on_enter_shape(self):
+        print("enter shape")
+        self.message_q.append(
+            TemplateSendMessage(
+                alt_text="Choose shape of node",
+                template=ButtonsTemplate(
+                    title='Shape',
+                    text='Please choose the shape of nodes',
+                    actions=[
+                        MessageTemplateAction(
+                            label='Ellipse',
+                            text='ellipse'
+                        ),
+                        MessageTemplateAction(
+                            label='Circle',
+                            text='circle'
+                        ),
+                        MessageTemplateAction(
+                            label='Rectangular',
+                            text='box'
+                        ),
+                        MessageTemplateAction(
+                            label='Plaintext',
+                            text='plaintext'
+                        )
+                    ]
+                )
+            )
+        )
+        self.line_bot_reply()
+
     def _on_enter_ready(self):
         print("enter ready")
         message = self.get_cur_relation()
         self.message_q.append(
-            TextSendMessage(message[:], emojis=hint_emoji)
+            TextSendMessage(message[:])
         )
         message = "Choose an option!"
         self.message_q.append(TextSendMessage(message[:]))
@@ -250,7 +287,7 @@ class RobotMachine(object):
     def _on_enter_delete(self):
         print("enter delete")
         message = self.get_cur_relation()
-        self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
+        self.message_q.append(TextSendMessage(message[:]))
         message = "Enter the number of relation you want to delete:"
         self.message_q.append(TextSendMessage(message[:]))
         self.line_bot_reply()
@@ -317,7 +354,7 @@ class RobotMachine(object):
     def _on_enter_input(self):
         print("enter input")
         message = self.get_cur_relation()
-        self.message_q.append(TextSendMessage(message[:], emojis=hint_emoji))
+        self.message_q.append(TextSendMessage(message[:]))
 
         message = "Enter the next node:"
         self.message_q.append(TextSendMessage(message[:]))
@@ -365,7 +402,7 @@ class RobotMachine(object):
 
         message = self.get_cur_nodes()
         self.message_q.append(
-            TextSendMessage(text=message[:], emojis=hint_emoji)
+            TextSendMessage(text=message[:])
         )
 
         self.message_q.append(
@@ -402,7 +439,7 @@ class RobotMachine(object):
 
         message = self.get_cur_nodes()
         self.message_q.append(
-            TextSendMessage(text=message[:], emojis=hint_emoji)
+            TextSendMessage(text=message[:])
         )
 
         message = "Please enter node number from the above list.\nYou could seperate"\
@@ -422,7 +459,7 @@ class RobotMachine(object):
             
         graph.graph_attr["rankdir"] = self.graph_dir
         for node in self.nodes:
-            graph.node(node[0], node[0], style='filled', fillcolor=node[1])
+            graph.node(node[0], node[0], style='filled', fillcolor=node[1], shape=self.node_shape)
         for relation in self.relations:
             print(relation)
             if (relation[2] != ""):

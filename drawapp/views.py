@@ -18,17 +18,9 @@ from linebot.models import  (
 from drawapp.machine import RobotMachine
 # Create your views here.
 
-
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 user_map = {}
-hint_emoji = [
-    {
-        "index": 0,
-        "productId": "5ac22b23040ab15980c9b44d",
-        "emojiId": "022"
-    }
-]
 cross_emoji = [
     {
         "index": 0,
@@ -67,6 +59,10 @@ def callback(request):
                 user_map[user_id].to_start()
                 return HttpResponse()
 
+            if (not isinstance(event, MessageEvent)):
+                return HttpResponse()
+
+            # decide state machine transitions according to state and input
             user_map[user_id].reply_token = event.reply_token
             if (user_map[user_id].is_start()):
                 # start state, input graph type
@@ -74,6 +70,9 @@ def callback(request):
             elif (user_map[user_id].is_dir()):
                 # direction state
                 dir_transition(event, user_id)
+            elif (user_map[user_id].is_shape()):
+                # shape state
+                shape_transition(event, user_id)
             elif (user_map[user_id].is_ready()):
                 # ready state, input relation or node
                 ready_transition(event, user_id)
@@ -99,10 +98,13 @@ def callback(request):
                 # input state, input relation or node
                 input_transition(event, user_id)
             elif (user_map[user_id].is_coloring()):
+                # coloring state, whether color nodes or not
                 yes_no_transition(event, user_id)
             elif (user_map[user_id].is_color_input()):
+                # color input state, choose color
                 color_input_transition(event, user_id)
             elif (user_map[user_id].is_node_input()):
+                # node input state, choose nodes
                 node_input_transition(event, user_id)
             elif (user_map[user_id].is_gen()):
                 # generate graph state, input continue or not
@@ -190,12 +192,25 @@ def yes_no_transition(event, user_id):
         user_map[user_id].unrecognized()
 
 def dir_transition(event, user_id):
-    if (event.message.text.upper() == "TD"):
-        user_map[user_id].graph_dir = "TD"
+    if (event.message.text.upper() == "TD"
+        or event.message.text.upper() == "LR"):
+        user_map[user_id].graph_dir = event.message.text.upper()
         user_map[user_id].enter_dir()
-    elif (event.message.text.upper() == "LR"):
-        user_map[user_id].graph_dir = "LR"
-        user_map[user_id].enter_dir()
+    else:
+        message = "$ Unrecogized input\nPlease choose again"
+        user_map[user_id].message_q.append(
+            TextSendMessage(text=message, emojis=cross_emoji)
+        )
+        user_map[user_id].unrecognized()
+
+
+def shape_transition(event, user_id):
+    if (event.message.text.lower() == "ellipse"
+        or event.message.text.lower() == "box"
+        or event.message.text.lower() == "circle"
+        or event.message.text.lower() == "plaintext"):
+        user_map[user_id].node_shape = event.message.text.lower() 
+        user_map[user_id].enter_shape()
     else:
         message = "$ Unrecogized input\nPlease choose again"
         user_map[user_id].message_q.append(
@@ -208,9 +223,9 @@ def ready_transition(event, user_id):
     if (event.message.text.lower() == 'relation'):
         user_map[user_id].enter_input()
     elif (event.message.text.lower() == 'restart'):
-        message = "$ DrawBot restarted!"
+        message = "🤖 DrawBot restarted!"
         user_map[user_id].message_q.append(
-            TextSendMessage(text=message, emojis=hint_emoji)
+            TextSendMessage(text=message)
         )
         user_map[user_id].enter_restart()
         user_map[user_id].relations = []
