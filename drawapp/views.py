@@ -56,7 +56,7 @@ def callback(request):
                 user_map[user_id].to_start()
                 return HttpResponse()
 
-            if (not isinstance(event, MessageEvent)):
+            if (not (isinstance(event, MessageEvent) and event.message.type == "text")):
                 return HttpResponse()
 
             # decide state machine transitions according to state and input

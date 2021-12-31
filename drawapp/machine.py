@@ -26,52 +26,21 @@ class RobotMachine(object):
 
     def __init__(self, user_id):
         self.state = [
-            {
-                "name": "start",
-                "on_enter": self._on_enter_start
-            }, {
-                "name": "dir",
-                "on_enter": self._on_enter_dir
-            }, {
-                "name": "shape",
-                "on_enter": self._on_enter_shape
-            }, {
-                "name": "ready",
-                "on_enter": self._on_enter_ready
-            }, {
-                "name": "input",
-                "on_enter": self._on_enter_input
-            }, {
-                "name": "delete",
-                "on_enter": self._on_enter_delete
-            }, {
-                "name": "node1",
-                "on_enter": self._on_enter_node1
-            }, {
-                "name": "node2",
-                "on_enter": self._on_enter_node2
-            }, {
-                "name": "label",
-                "on_enter": self._on_enter_label
-            }, {
-                "name": "other",
-                "on_enter": self._on_enter_other
-            }, {
-                "name": "coloring",
-                "on_enter": self._on_enter_coloring
-            }, {
-                "name": "color_input",
-                "on_enter": self._on_enter_color_input
-            }, {
-                "name": "node_input",
-                "on_enter": self._on_enter_node_input
-            }, {
-                "name": "gen",
-                "on_enter": self._on_enter_gen
-            }, {
-                "name": "wait",
-                "on_enter": self._on_enter_wait
-            }
+            "start",
+            "dir",
+            "shape",
+            "ready",
+            "delete",
+            "input",
+            "node1",
+            "node2",
+            "label",
+            "other",
+            "coloring",
+            "color_input",
+            "node_input",
+            "gen",
+            "wait"
         ]
         self.user_id = user_id
 
@@ -169,7 +138,7 @@ class RobotMachine(object):
         return message
 
 
-    def _on_enter_start(self):
+    def on_enter_start(self):
         print("enter start")
         self.message_q.append(
             TemplateSendMessage(
@@ -192,7 +161,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_dir(self):
+    def on_enter_dir(self):
         print("enter dir")
         self.message_q.append(
             TemplateSendMessage(
@@ -215,7 +184,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_shape(self):
+    def on_enter_shape(self):
         print("enter shape")
         self.message_q.append(
             TemplateSendMessage(
@@ -246,7 +215,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_ready(self):
+    def on_enter_ready(self):
         print("enter ready")
         message = self.get_cur_relation()
         self.message_q.append(
@@ -289,7 +258,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_delete(self):
+    def on_enter_delete(self):
         print("enter delete")
         message = self.get_cur_relation()
         self.message_q.append(TextSendMessage(message[:]))
@@ -297,13 +266,13 @@ class RobotMachine(object):
         self.message_q.append(TextSendMessage(message[:]))
         self.line_bot_reply()
 
-    def _on_enter_node1(self):
+    def on_enter_node1(self):
         print("enter node1")
         message = "Enter the second node:"
         self.message_q.append(TextSendMessage(message[:]))
         self.line_bot_reply()
     
-    def _on_enter_node2(self):
+    def on_enter_node2(self):
         print("enter node2")
         self.message_q.append(
             TemplateSendMessage(
@@ -326,13 +295,13 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_label(self):
+    def on_enter_label(self):
         print("enter label")
         message = "Enter the label for relation:"
         self.message_q.append(TextSendMessage(message[:]))
         self.line_bot_reply()
 
-    def _on_enter_other(self):
+    def on_enter_other(self):
         print("enter other")
         self.message_q.append(
             TemplateSendMessage(
@@ -356,7 +325,7 @@ class RobotMachine(object):
         self.line_bot_reply()
 
 
-    def _on_enter_input(self):
+    def on_enter_input(self):
         print("enter input")
         message = self.get_cur_relation()
         self.message_q.append(TextSendMessage(message[:]))
@@ -373,7 +342,7 @@ class RobotMachine(object):
         self.line_bot_reply()
 
     
-    def _on_enter_coloring(self):
+    def on_enter_coloring(self):
         print("enter coloring")
         for relation in self.relations:
             if (not relation[0] in [item[0] for item in self.nodes]):
@@ -402,7 +371,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_color_input(self):
+    def on_enter_color_input(self):
         print("enter color input")
 
         message = self.get_cur_nodes()
@@ -439,7 +408,7 @@ class RobotMachine(object):
         )
         self.line_bot_reply()
 
-    def _on_enter_node_input(self):
+    def on_enter_node_input(self):
         print("enter node input")
 
         message = self.get_cur_nodes()
@@ -455,7 +424,7 @@ class RobotMachine(object):
         self.line_bot_reply()
 
 
-    def _on_enter_gen(self):
+    def on_enter_gen(self):
         print("enter gen")
         if self.graph_type == "directed":
             graph = Digraph()
@@ -487,7 +456,7 @@ class RobotMachine(object):
         )
         self.go_wait()
 
-    def _on_enter_wait(self):
+    def on_enter_wait(self):
         print("enter wait")
         self.message_q.append(
             TemplateSendMessage(
