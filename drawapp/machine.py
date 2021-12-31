@@ -6,6 +6,8 @@ from linebot.models import  (
     TemplateSendMessage,
     ImageSendMessage,
     ButtonsTemplate,
+    CarouselTemplate,
+    CarouselColumn,
     MessageTemplateAction
 ) 
 
@@ -143,19 +145,32 @@ class RobotMachine(object):
         self.message_q.append(
             TemplateSendMessage(
                 alt_text="Choose graph type",
-                template=ButtonsTemplate(
-                    title='Types',
-                    text='Please choose the graph type',
-                    actions=[
-                        MessageTemplateAction(
-                            label='Directed graph',
-                            text='directed'
+                template=CarouselTemplate(
+                    columns=[
+                        CarouselColumn(
+                            thumbnail_image_url = 'https://i.imgur.com/1tjQxij.png',
+                            title = "Directed graph",
+                            text = "Graph with arrow edges",
+                            actions = [
+                                MessageTemplateAction(
+                                    label = "Use Directed Graph",
+                                    text = "directed"
+                                )
+                            ]
                         ),
-                        MessageTemplateAction(
-                            label='Undirected graph',
-                            text='undirected'
+                        CarouselColumn(
+                            thumbnail_image_url = 'https://i.imgur.com/Kzuty7G.png',
+                            title = "Undirected graph",
+                            text = "Graph without arrow edges",
+                            actions = [
+                                MessageTemplateAction(
+                                    label = "Use Undirected Graph",
+                                    text = "undirected"
+                                )
+                            ]
                         )
-                    ]
+                    ],
+                    image_size= "contain"
                 )
             )
         )
