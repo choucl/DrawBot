@@ -1,6 +1,6 @@
 # DrawBot
 
-![icon](./icon.png)
+![icon](./Banner.png)
 
 A Line bot for drawing amazing graph with interactive messages! This project uses `Django` as the server framework to implement the Line bot.
 
