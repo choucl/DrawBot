@@ -1,1 +1,1 @@
-web: gunicorn drawlinebot.wsgi
+web: gunicorn --workers 1 --pythonpath drawbot drawbot.wsgi
