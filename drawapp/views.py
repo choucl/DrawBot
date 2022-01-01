@@ -143,9 +143,9 @@ def line_parse(str):
         relations = []
         for i in range(0, len(split) - 2, 2):
             if (split[i + 1] == '->'):
-                relations.append((split[i], split[i + 2], ""))
+                relations.append([split[i], split[i + 2], ""])
             elif (split[i + 1][0] == '-' and split[i + 1][-1] == '>'):
-                relations.append((split[i], split[i + 2], split[i + 1][1:-1]))
+                relations.append([split[i], split[i + 2], split[i + 1][1:-1]])
             else:
                 return (False, [])
         return (True, relations)
