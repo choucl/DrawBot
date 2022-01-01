@@ -27,6 +27,7 @@ SECRET_KEY = os.environ['DJANGO_DRAW_SECRET']
 DEBUG = True
 
 ALLOWED_HOSTS = [
+        'drawlinebot.herokuapp.com',
         'caae-111-255-174-51.ngrok.io'
 ]
 
@@ -120,6 +121,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
 
 # Default primary key field type
