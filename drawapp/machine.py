@@ -431,10 +431,10 @@ class RobotMachine(object):
             TextSendMessage(text=message[:])
         )
 
-        message = "Please enter node number from the above list.\nYou could seperate"\
-                "different nodes with spaces"
+        message = "$ Please enter node number from the above list.\nYou could seperate"\
+                " different nodes with spaces"
         self.message_q.append(
-            TextSendMessage(text=message)
+            TextSendMessage(text=message, emojis=hint_emoji)
         )
         self.line_bot_reply()
 

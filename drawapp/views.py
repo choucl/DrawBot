@@ -49,7 +49,7 @@ def callback(request):
             # check if is new user and initiate
             if (not user_id in user_map):
                 user_map[user_id] = RobotMachine(user_id)
-                user_map[user_id].get_graph().draw('my_state_diagram.png', prog='dot')
+                user_map[user_id].get_graph().draw('./imgs/my_state_diagram.png', prog='dot')
 
             if (isinstance(event, JoinEvent) or isinstance(event, FollowEvent)):
                 user_map[user_id].reply_token = event.reply_token
