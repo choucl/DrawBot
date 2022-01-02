@@ -6,85 +6,79 @@ A Line bot for drawing amazing graph with interactive messages! This project use
 
 Add the bot with the following QR code:
 
-![qrcode](https://qr-official.line.me/sid/L/123iufuo.png)
+<div>
+    <p style="text-align: center"><img src="https://qr-official.line.me/sid/L/123iufuo.png" alt="qrcode" height=200></p>
+</div>
+
+
 
 ## Demo
 
 ### Welcoming & Starting
 
-<div style="display:flex;justify-content:space-around;border:1px #000000 solid;padding-top:1em;border-radius:1em">
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/welcoming.png" alt="welcoming" height=400>
-        <p>Welcoming & choose graph type</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/choose_direction.png" alt="choose_direction" height=400>
-        <p>Choose direction of graph</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/choose_shape.png" alt="choose_shape" height=400>
-        <p>Choose shape of nodes</p>
-    </div>
-</div>
+<table style="display:flex;justify-content:space-around;padding-top:1em;">
+    <tr>
+    	<td style="text-align: center"><img src="./imgs/welcoming.png" alt="welcoming" height=400></td>
+        <td style="text-align: center"><img src="./imgs/choose_direction.png" alt="choose_direction" height=400></td>
+        <td style="text-align: center"><img src="./imgs/choose_shape.png" alt="choose_shape" height=400></td>
+    </tr>
+    <tr>
+    	<td style="text-align: center"><p>Welcoming & choose graph type</p></td>
+        <td style="text-align: center"><p>Choose direction of graph</p></td>
+        <td style="text-align: center"><p>Choose shape of nodes</p></td>
+    </tr>
+</table>
 
 ### Manipulation of relations
 
-<div style="display:flex;justify-content:space-around;border:1px #000000 solid;padding-top:1em;border-radius:1em">
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/fast_input.png" alt="options" height=400>
-        <p>Options</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/input.png" alt="input" height=400>
-        <p>Input</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/deletion.png" alt="deletion" height=400>
-        <p>Deletion</p>
-    </div>
-</div>
+<table style="display:flex;justify-content:space-around;padding-top:1em;">
+    <tr>
+    	<td style="text-align: center"><img src="./imgs/fast_input.png" alt="options" height=400></td>
+        <td style="text-align: center"><img src="./imgs/input.png" alt="input" height=400></td>
+        <td style="text-align: center"><img src="./imgs/deletion.png" alt="deletion" height=400></td>
+    </tr>
+    <tr>
+    	<td style="text-align: center"><p>Options</p></td>
+        <td style="text-align: center"><p>Input</p></td>
+        <td style="text-align: center"><p>Deletion</p></td>
+    </tr>
+</table>
+
+
 
 ### Interactive Input
 
-<div style="display:flex;justify-content:space-around;border:1px #000000 solid;padding-top:1em;border-radius:1em">
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/input.png" alt="node1" height=400>
-        <p>Input node 1</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/input_2.png" alt="input2" height=400>
-        <p>Input node 2</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/label.png" alt="label" height=400>
-        <p>Label to ther relation</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/others.png" alt="other" height=400>
-        <p>Other nodes?</p>
-    </div>
-</div>
+<table style="display:flex;justify-content:space-around;padding-top:1em;">
+    <tr>
+    	<td style="text-align: center"><img src="./imgs/input.png" alt="node1" height=400></td>
+        <td style="text-align: center"><img src="./imgs/input_2.png" alt="input2" height=400></td>
+        <td style="text-align: center"><img src="./imgs/label.png" alt="label" height=400></td>
+        <td style="text-align: center"><img src="./imgs/others.png" alt="other" height=400></td>
+    </tr>
+    <tr>
+    	<td style="text-align: center"><p>Input node 1</p></td>
+        <td style="text-align: center"><p>Input node 2</p></td>
+        <td style="text-align: center"><p>Label to ther relation</p></td>
+        <td style="text-align: center"><p>Other nodes?</p></td>
+    </tr>
+</table>
 
 ### Generation
 
-<div style="display:flex;justify-content:space-around;border:1px #000000 solid;padding-top:1em;border-radius:1em">
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/generate.png" alt="generate" height=400>
-        <p>Color nodes</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/choose_color.png" alt="choose_color" height=400>
-        <p>Choose color</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/choose_nodes.png" alt="choose_nodes" height=400>
-        <p>Choose nodes</p>
-    </div>
-    <div style="display:flex;align-items:center;flex-direction:column">
-    	<img src="./imgs/wait.png" alt="genterate_wait" height=400>
-        <p>Generate & Wait</p>
-    </div>
-</div>
+<table style="display:flex;justify-content:space-around;padding-top:1em;">
+    <tr>
+    	<td style="text-align: center"><img src="./imgs/generate.png" alt="generate" height=400></td>
+        <td style="text-align: center"><img src="./imgs/choose_color.png" alt="choose_color" height=400></td>
+        <td style="text-align: center"><img src="./imgs/choose_nodes.png" alt="choose_nodes" height=400></td>
+        <td style="text-align: center"><img src="./imgs/wait.png" alt="genterate_wait" height=400></td>
+    </tr>
+    <tr>
+    	<td style="text-align: center"><p>Color nodes</p></td>
+        <td style="text-align: center"><p>Choose color</p></td>
+        <td style="text-align: center"><p>Choose nodes</p></td>
+        <td style="text-align: center"><p>Generate & Wait</p></td>
+    </tr>
+</table>
 
 ## Quick Start
 
