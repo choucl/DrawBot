@@ -17,69 +17,29 @@ Add the bot with the following QR code:
 
 ### Welcoming & Starting
 
-<table style="display:flex;justify-content:space-around;padding-top:1em;">
-    <tr>
-    	<td style="text-align: center"><img src="./imgs/welcoming.png" alt="welcoming" height=400></td>
-        <td style="text-align: center"><img src="./imgs/choose_direction.png" alt="choose_direction" height=400></td>
-        <td style="text-align: center"><img src="./imgs/choose_shape.png" alt="choose_shape" height=400></td>
-    </tr>
-    <tr>
-    	<td style="text-align: center"><p>Welcoming & choose graph type</p></td>
-        <td style="text-align: center"><p>Choose direction of graph</p></td>
-        <td style="text-align: center"><p>Choose shape of nodes</p></td>
-    </tr>
-</table>
+|                    Welcome & choose type                    |                  Choose direction of graph                   |                    Choose shape of nodes                     |
+| :---------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| <img src="./imgs/welcoming.png" alt="welcoming" height=400> | <img src="./imgs/choose_direction.png" alt="choose_direction" height=400> | <img src="./imgs/choose_shape.png" alt="choose_shape" height=400> |
 
 ### Manipulation of relations
 
-<table style="display:flex;justify-content:space-around;padding-top:1em;">
-    <tr>
-    	<td style="text-align: center"><img src="./imgs/fast_input.png" alt="options" height=400></td>
-        <td style="text-align: center"><img src="./imgs/input.png" alt="input" height=400></td>
-        <td style="text-align: center"><img src="./imgs/deletion.png" alt="deletion" height=400></td>
-    </tr>
-    <tr>
-    	<td style="text-align: center"><p>Options</p></td>
-        <td style="text-align: center"><p>Input</p></td>
-        <td style="text-align: center"><p>Deletion</p></td>
-    </tr>
-</table>
-
-
+|                          Options                           |                        Input                        |                         Deletion                          |
+| :--------------------------------------------------------: | :-------------------------------------------------: | :-------------------------------------------------------: |
+| <img src="./imgs/fast_input.png" alt="options" height=400> | <img src="./imgs/input.png" alt="input" height=400> | <img src="./imgs/deletion.png" alt="deletion" height=400> |
 
 ### Interactive Input
 
-<table style="display:flex;justify-content:space-around;padding-top:1em;">
-    <tr>
-    	<td style="text-align: center"><img src="./imgs/input.png" alt="node1" height=400></td>
-        <td style="text-align: center"><img src="./imgs/input_2.png" alt="input2" height=400></td>
-        <td style="text-align: center"><img src="./imgs/label.png" alt="label" height=400></td>
-        <td style="text-align: center"><img src="./imgs/others.png" alt="other" height=400></td>
-    </tr>
-    <tr>
-    	<td style="text-align: center"><p>Input node 1</p></td>
-        <td style="text-align: center"><p>Input node 2</p></td>
-        <td style="text-align: center"><p>Label to ther relation</p></td>
-        <td style="text-align: center"><p>Other nodes?</p></td>
-    </tr>
-</table>
+|                    Input node 1                     |                      Input node 2                      |               Label to ther relation                |                     Other nodes?                     |
+| :-------------------------------------------------: | :----------------------------------------------------: | :-------------------------------------------------: | :--------------------------------------------------: |
+| <img src="./imgs/input.png" alt="node1" height=400> | <img src="./imgs/input_2.png" alt="input2" height=400> | <img src="./imgs/label.png" alt="label" height=400> | <img src="./imgs/others.png" alt="other" height=400> |
 
 ### Generation
 
-<table style="display:flex;justify-content:space-around;padding-top:1em;">
-    <tr>
-    	<td style="text-align: center"><img src="./imgs/generate.png" alt="generate" height=400></td>
-        <td style="text-align: center"><img src="./imgs/choose_color.png" alt="choose_color" height=400></td>
-        <td style="text-align: center"><img src="./imgs/choose_nodes.png" alt="choose_nodes" height=400></td>
-        <td style="text-align: center"><img src="./imgs/wait.png" alt="genterate_wait" height=400></td>
-    </tr>
-    <tr>
-    	<td style="text-align: center"><p>Color nodes</p></td>
-        <td style="text-align: center"><p>Choose color</p></td>
-        <td style="text-align: center"><p>Choose nodes</p></td>
-        <td style="text-align: center"><p>Generate & Wait</p></td>
-    </tr>
-</table>
+|                        Color nodes                        |                         Choose color                         |                         Choose nodes                         |                       Generate & Wait                       |
+| :-------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :---------------------------------------------------------: |
+| <img src="./imgs/generate.png" alt="generate" height=400> | <img src="./imgs/choose_color.png" alt="choose_color" height=400> | <img src="./imgs/choose_nodes.png" alt="choose_nodes" height=400> | <img src="./imgs/wait.png" alt="genterate_wait" height=400> |
+
+
 
 ## Quick Start
 
