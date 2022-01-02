@@ -2,7 +2,7 @@
 
 ![icon](./imgs/Banner.png)
 
-A Line bot for drawing amazing graph with interactive messages! This project uses `Django` as the server framework to implement the Line bot.
+A LINE bot for drawing amazing graph based on [Graphviz](https://graphviz.org/) with interactive messages! This project uses `Django` as the server framework to implement the LINE bot.
 
 Add the bot with the following QR code:
 
@@ -10,6 +10,7 @@ Add the bot with the following QR code:
     <p style="text-align: center"><img src="https://qr-official.line.me/sid/L/123iufuo.png" alt="qrcode" height=200></p>
 </div>
 
+\* **Note**: the bot is hosted by Heroku, the response might be slower when the server is asleep
 
 
 ## Demo
